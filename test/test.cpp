@@ -21,7 +21,7 @@ bool run_test_for(int test_index) {
     std::string test_input;
     std::string expected_output;
     std::string test_source_code_path = std::string(__FILE__).substr(0, std::string(__FILE__).find_last_of("/\\"));
-    std::string test_file_path = std::filesystem::path(test_source_code_path) / "cases" / (std::to_string(test_index) + ".txt");
+    std::string test_file_path = (std::filesystem::path(test_source_code_path) / "cases" / (std::to_string(test_index) + ".txt")).string();
     std::ifstream test_file(test_file_path);
     if (!test_file.is_open()) {
         printf("Test %d: test data file not found\n", test_index);

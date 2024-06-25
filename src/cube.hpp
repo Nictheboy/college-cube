@@ -20,12 +20,12 @@ class Cube {
                 throw std::invalid_argument("Invalid cube description format");
             Surface surface = ToSurface(surface_name);
             Color colors[Rank * Rank];
-            for (int i = 0; i < Rank * Rank; i++) {
+            for (int j = 0; j < Rank * Rank; j++) {
                 std::string color_name;
                 ss >> color_name;
                 if (color_name.length() == 0)
                     throw std::invalid_argument("Invalid cube description format");
-                colors[i] = ToColor(color_name);
+                colors[j] = ToColor(color_name);
             }
             color_middle[surface] = colors[4];
             color_arround[surface][0] = colors[0];

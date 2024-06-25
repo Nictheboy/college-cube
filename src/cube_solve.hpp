@@ -56,20 +56,20 @@ class CubeHandler : public IHandler<PCubeTask> {
                 for (int i = 0; i < actions_count; i++) {
                     CubeAction action = actions[i];
                     Cube rotated_cube = task->cube.Rotate(action);
-                    std::vector<CubeAction> actions(task->actions);
-                    actions.push_back(action);
+                    std::vector<CubeAction> task_actions(task->actions);
+                    task_actions.push_back(action);
                     if (enable_debug_log) {
                         printf("----------------------------\n");
-                        printf("Depth: %zu\n", actions.size());
+                        printf("Depth: %zu\n", task_actions.size());
                         printf("Actions: ");
-                        for (auto action : actions) {
-                            CubeActionStandard standard_action = ConvertCubeActionFormat(action);
+                        for (auto task_action : task_actions) {
+                            CubeActionStandard standard_action = ConvertCubeActionFormat(task_action);
                             printf("%d%s ", standard_action.standard_surface_index, standard_action.is_positive_direction ? "+" : "-");
                         }
                         printf("\n");
                         std::cout << rotated_cube.ToString() << std::endl;
                     }
-                    enqueuer.Enqueue(new CubeTask(std::move(rotated_cube), std::move(actions)));
+                    enqueuer.Enqueue(new CubeTask(std::move(rotated_cube), std::move(task_actions)));
                 }
             }
         }

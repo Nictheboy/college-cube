@@ -323,6 +323,8 @@ inline CubeActionStandard ConvertCubeActionFormat(CubeAction action) {
                 standard_action.standard_surface_index = 7;
                 standard_action.is_positive_direction = action.direction == Direction::CounterClockwise;
                 break;
+            default:
+                throw std::runtime_error("Invalid surface");
         }
     } else {
         switch (action.surface) {
@@ -350,6 +352,8 @@ inline CubeActionStandard ConvertCubeActionFormat(CubeAction action) {
                 standard_action.standard_surface_index = 8;
                 standard_action.is_positive_direction = action.direction == Direction::CounterClockwise;
                 break;
+            default:
+                throw std::runtime_error("Invalid surface");
         }
     }
     return standard_action;
