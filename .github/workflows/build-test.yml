@@ -78,7 +78,7 @@ jobs:
       run: |
         mkdir ${{github.workspace}}\build\windows-release\
         cp ${{github.workspace}}/build/bin/Release/cube.exe ${{github.workspace}}\build\windows-release\
-        cp ${{github.workspace}}/build/bin/Release/cube-test.exe ${{github.workspace}}\build\windows-release\
+        # cp ${{github.workspace}}/build/bin/Release/cube-test.exe ${{github.workspace}}\build\windows-release\
         ls
         Compress-Archive -Path ${{github.workspace}}\build\windows-release\ -DestinationPath ${{github.workspace}}\build\windows-release.zip
 
