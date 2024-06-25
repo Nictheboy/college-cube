@@ -1,3 +1,9 @@
+# Copyright (c) 2024 Nictheboy Li <nictheboy@outlook.com>
+# This file is under MIT License (MIT), although other files in this repository may be under a different license.
+
+# Universal CMake workflow template for C++ projects
+# Orignated from https://github.com/surakarta-game/surakarta-network/blob/main/.github/workflows/build-test.yml
+
 name: Build for Windows and Linux
 
 on: [push, pull_request, workflow_dispatch]

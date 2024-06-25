@@ -1,3 +1,14 @@
+/*
+ *  Description:    A generic task system for DFS-like algorithms.
+ *                  This file defines the interfaces of the task system,
+ *                  and provides two implementations: single-thread and multi-thread.
+ *
+ *  Author(s):      Nictheboy Li <nictheboy@outlook.com>
+ *
+ *  Last Updated:   2024-06-25
+ *
+ */
+
 #pragma once
 #include <concurrentqueue.h>
 #include <atomic>
@@ -6,6 +17,8 @@
 #include <queue>
 #include <thread>
 
+/// @brief The interface of a task enqueuer.
+/// @tparam TTask The type of the task.
 template <typename TTask>
 class IEnqueuer {
    public:
@@ -13,6 +26,8 @@ class IEnqueuer {
     virtual void Enqueue(TTask task) = 0;
 };
 
+/// @brief The interface of a task handler.
+/// @tparam TTask The type of the task.
 template <typename TTask>
 class IHandler {
    public:
@@ -20,6 +35,8 @@ class IHandler {
     virtual void Handle(TTask& task, IEnqueuer<TTask>& enqueuer) = 0;
 };
 
+/// @brief The interface of a task system.
+/// @tparam TTask The type of the task.
 template <typename TTask>
 class IHandleQueueSystem {
    public:
@@ -27,6 +44,8 @@ class IHandleQueueSystem {
     virtual void Solve(TTask& initial_task, IHandler<TTask>& handler) = 0;
 };
 
+/// @brief The implementation of a task system using a single thread.
+/// @tparam TTask The type of the task.
 template <typename TTask>
 class HandleQueueSystemSingleThread : public IHandleQueueSystem<TTask> {
    private:
@@ -53,6 +72,8 @@ class HandleQueueSystemSingleThread : public IHandleQueueSystem<TTask> {
     }
 };
 
+/// @brief The implementation of a task system using multiple threads.
+/// @tparam TTask The type of the task.
 template <typename TTask>
 class HandleQueueSystemMultiThread : public IHandleQueueSystem<TTask> {
     const int concurrency;

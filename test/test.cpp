@@ -1,3 +1,12 @@
+/*
+ *  Description:    A test program for the cube solver.
+ *
+ *  Author(s):      Nictheboy Li <nictheboy@outlook.com>
+ *
+ *  Last Updated:   2024-06-25
+ *
+ */
+
 #include <filesystem>
 #include <fstream>
 #include "../src/cube_solve.hpp"

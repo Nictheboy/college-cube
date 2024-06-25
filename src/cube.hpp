@@ -1,3 +1,13 @@
+/*
+ *  Description:    Implements Cube class, which contains the cube state and
+ *                  has the ability to import, export and rotate the cube.
+ *
+ *  Author(s):      Nictheboy Li <nictheboy@outlook.com>
+ *
+ *  Last Updated:   2024-06-25
+ *
+ */
+
 #pragma once
 #include <sstream>
 #include "cube_common.hpp"

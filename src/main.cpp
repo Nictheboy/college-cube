@@ -1,3 +1,12 @@
+/*
+ *  Description:    The main function of the program.
+ *
+ *  Author(s):      Nictheboy Li <nictheboy@outlook.com>
+ *
+ *  Last Updated:   2024-06-25
+ *
+ */
+
 #include "cube_solve.hpp"
 
 std::string GetAllStdin() {
@@ -32,14 +41,20 @@ int main(int argc, char* argv[]) {
     }
     const int max_depth = std::stoi(argv[2]);
     bool multi_thread = std::string(argv[1]) == "multi-thread";
+
+    // A task system that will be used as a BFS algorithm.
     IHandleQueueSystem<PCubeTask>* pSystem =
         multi_thread
             ? (IHandleQueueSystem<PCubeTask>*)new HandleQueueSystemMultiThread<PCubeTask>()
             : (IHandleQueueSystem<PCubeTask>*)new HandleQueueSystemSingleThread<PCubeTask>();
+    
+    // A handler that will be used to handle the tasks.
     CubeHandler* pHandler = new CubeHandler(max_depth, false, false);
-    PCubeTask pTask = new CubeTask(Cube(GetAllStdin()), std::vector<CubeAction>());
-    std::cout << "Start solving..." << std::endl;
 
+    // The initial state of the cube.
+    PCubeTask pTask = new CubeTask(Cube(GetAllStdin()), std::vector<CubeAction>());
+
+    std::cout << "Start solving..." << std::endl;
     std::chrono::time_point start = std::chrono::system_clock::now();
     pSystem->Solve(pTask, *pHandler);
     std::chrono::time_point end = std::chrono::system_clock::now();

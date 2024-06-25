@@ -1,16 +1,27 @@
+/*
+ *  Description:    Common definitions for cube, and auxiliary functions for them.
+ *
+ *  Author(s):      Nictheboy Li <nictheboy@outlook.com>
+ *
+ *  Last Updated:   2024-06-25
+ *
+ */
+
 #pragma once
 #include <stdexcept>
 #include <string>
 
-constexpr int Rank = 3;
-constexpr int RoundCount = 8;
-constexpr int SurfaceCount = 6;
-enum Surface { Front,
+constexpr int Rank = 3;          // 3x3x3 cube
+constexpr int RoundCount = 8;    // 8 blocks in a round
+constexpr int SurfaceCount = 6;  // 6 surfaces in a cube
+enum Surface { Front,            // All 6 surfaces
                Back,
                Left,
                Right,
                Up,
                Down };
+
+// All 8 rotation positions in a round
 //  0    1    2
 //  7   mid   3
 //  6    5    4
@@ -22,6 +33,10 @@ enum RotationPosition { UpLeft = 0,
                         DownMiddle,
                         DownLeft,
                         MiddleLeft = 7 };
+
+// A surface with a rotation offset
+// The rotation offset exists because different representations of the cube have different rotation directions.
+// The offset is defined as the clockwise rotation of the surface, compared to the standard representation.
 struct SurfaceWithRotationOffset {
     Surface surface;
     int rotation_offset;  // positive: clockwise
@@ -29,24 +44,31 @@ struct SurfaceWithRotationOffset {
     SurfaceWithRotationOffset(Surface surface, int rotation_offset)
         : surface(surface), rotation_offset(rotation_offset) {}
 };
+
 enum class Color { White,
                    Yellow,
                    Red,
                    Pink,
                    Blue,
                    Green };
+
+// The relative position of a surface to another surface
 enum class RelativePosition { Upside,
                               Downside,
                               Leftside,
                               Rightside };
+
 enum class Direction { Clockwise,
                        CounterClockwise };
+
+// A cube action, in a convenient format
 struct CubeAction {
     bool is_middle_layer;
     Surface surface;
     Direction direction;
 };
 
+// A cube action, in a standard format
 struct CubeActionStandard {
     int standard_surface_index;
     bool is_positive_direction;
@@ -73,6 +95,7 @@ constexpr CubeActionStandard StandardActions[] = {
     {8, false},
 };
 
+/// @brief Convert a surface name to a surface
 inline Surface ToSurface(const std::string& surface_name) {
     Surface surface;
     switch (surface_name[0]) {
@@ -101,6 +124,7 @@ inline Surface ToSurface(const std::string& surface_name) {
     return surface;
 }
 
+/// @brief Convert a surface to a surface name
 inline std::string ToSurfaceName(Surface surface) {
     std::string surface_name;
     switch (surface) {
@@ -126,6 +150,7 @@ inline std::string ToSurfaceName(Surface surface) {
     return surface_name;
 }
 
+/// @brief Convert a color name to a color
 inline Color ToColor(const std::string& color_name) {
     Color color;
     switch (color_name[0]) {
@@ -154,6 +179,7 @@ inline Color ToColor(const std::string& color_name) {
     return color;
 }
 
+/// @brief Convert a color to a color name
 inline char ToColorName(Color color) {
     char color_name;
     switch (color) {
@@ -181,35 +207,25 @@ inline char ToColorName(Color color) {
     return color_name;
 }
 
+/// @brief Next rotation position, in a round
 inline RotationPosition operator++(RotationPosition& rotation_position) {
     rotation_position = static_cast<RotationPosition>((rotation_position + 1) % RoundCount);
     return rotation_position;
 }
 
+/// @brief Add an offset to a rotation position
 inline RotationPosition operator+(RotationPosition rotation_position, int offset) {
     if (offset < 0)
         offset = offset + (1 + (-offset) / RoundCount) * RoundCount;
     return static_cast<RotationPosition>(((int)rotation_position + offset * 2) % RoundCount);
 }
 
+/// @brief Subtract an offset from a rotation position
 inline RotationPosition operator-(RotationPosition rotation_position, int offset) {
     return rotation_position + (-offset);
 }
 
-inline RelativePosition operator+(RelativePosition relative_position, Direction direction) {
-    switch (relative_position) {
-        case RelativePosition::Upside:
-            return direction == Direction::Clockwise ? RelativePosition::Rightside : RelativePosition::Leftside;
-        case RelativePosition::Downside:
-            return direction == Direction::Clockwise ? RelativePosition::Leftside : RelativePosition::Rightside;
-        case RelativePosition::Leftside:
-            return direction == Direction::Clockwise ? RelativePosition::Upside : RelativePosition::Downside;
-        case RelativePosition::Rightside:
-            return direction == Direction::Clockwise ? RelativePosition::Downside : RelativePosition::Upside;
-        default:
-            throw std::invalid_argument("Invalid relative position");
-    }
-}
+/// @brief The surface in the certain relative position to another surface, and its rotation offset
 inline SurfaceWithRotationOffset operator+(Surface surface, RelativePosition relative_position) {
     switch (surface) {
         case Surface::Front:
@@ -295,6 +311,7 @@ inline SurfaceWithRotationOffset operator+(Surface surface, RelativePosition rel
     }
 }
 
+/// @brief Convert a non-standard cube action to a standard cube action
 inline CubeActionStandard ConvertCubeActionFormat(CubeAction action) {
     CubeActionStandard standard_action;
     if (action.is_middle_layer) {
@@ -359,14 +376,7 @@ inline CubeActionStandard ConvertCubeActionFormat(CubeAction action) {
     return standard_action;
 }
 
-inline bool operator==(const CubeActionStandard& a, const CubeActionStandard& b) {
-    return a.standard_surface_index == b.standard_surface_index && a.is_positive_direction == b.is_positive_direction;
-}
-
-inline bool operator!=(const CubeActionStandard& a, const CubeActionStandard& b) {
-    return !(a == b);
-}
-
+/// @brief Convert a standard cube action to a non-standard cube action
 inline CubeAction ConvertCubeActionFormat(CubeActionStandard standard_action) {
     CubeAction action;
     if (standard_action.standard_surface_index == 1 || standard_action.standard_surface_index == 4 || standard_action.standard_surface_index == 7) {

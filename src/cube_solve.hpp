@@ -1,9 +1,21 @@
+/*
+ *  Description:    Implements CubeHandler class, which is used to solve the cube.
+ *                  The CubeHandler class implements IHandler<PCubeTask>, which
+ *                  means it is a task handler.
+ *
+ *  Author(s):      Nictheboy Li <nictheboy@outlook.com>
+ *
+ *  Last Updated:   2024-06-25
+ *
+ */
+
 #include <iostream>
 #include <mutex>
 #include <vector>
 #include "cube.hpp"
 #include "task_system.hpp"
 
+/// @brief A task that will be queued in the task system.
 typedef struct CubeTask {
     Cube cube;
     std::vector<CubeAction> actions;
@@ -12,6 +24,7 @@ typedef struct CubeTask {
         : cube(cube), actions(actions) {}
 }* PCubeTask;
 
+/// @brief A handler that will be used to solve the cube.
 class CubeHandler : public IHandler<PCubeTask> {
    private:
     // Constant Members
@@ -22,7 +35,7 @@ class CubeHandler : public IHandler<PCubeTask> {
     bool stop_on_find_one;
 
     // Variable Members
-    std::mutex success_mutex;
+    std::mutex success_mutex; // prevent two success happening at the same time
     bool is_solved = false;
     std::string action_description;
 
@@ -53,6 +66,7 @@ class CubeHandler : public IHandler<PCubeTask> {
             is_solved = true;
         } else {
             if ((!is_solved || !stop_on_find_one) && task->actions.size() < (unsigned int)max_depth) {
+                // Queue all possible actions
                 for (int i = 0; i < actions_count; i++) {
                     CubeAction action = actions[i];
                     Cube rotated_cube = task->cube.Rotate(action);
