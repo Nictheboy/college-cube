@@ -24,6 +24,9 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /O2")
 endif()
 
+add_subdirectory(third_party/concurrent_queue)
+include_directories(third_party/concurrent_queue)
+
 if(NOT TARGET cube)
     SET(SOURCE
         src/main.cpp

@@ -1,9 +1,8 @@
 #pragma once
+#include <concurrentqueue.h>
 #include <atomic>
 #include <chrono>
-#include <condition_variable>
 #include <memory>
-#include <mutex>
 #include <queue>
 #include <thread>
 
@@ -61,17 +60,13 @@ class HandleQueueSystemMultiThread : public IHandleQueueSystem<TTask> {
    private:
     class Enqueuer : public IEnqueuer<TTask> {
        private:
-        std::queue<TTask>& queue;
-        std::mutex& mutex;
-        std::condition_variable& condition_variable;
+        moodycamel::ConcurrentQueue<TTask>& queue;
 
        public:
-        Enqueuer(std::queue<TTask>& queue, std::mutex& mutex, std::condition_variable& condition_variable)
-            : queue(queue), mutex(mutex), condition_variable(condition_variable) {}
+        Enqueuer(moodycamel::ConcurrentQueue<TTask>& queue)
+            : queue(queue) {}
         void Enqueue(TTask task) override {
-            std::lock_guard lock(mutex);
-            queue.push(task);
-            condition_variable.notify_all();
+            queue.enqueue(task);
         }
     };
 
@@ -80,11 +75,9 @@ class HandleQueueSystemMultiThread : public IHandleQueueSystem<TTask> {
         : concurrency(concurrency) {}
 
     void Solve(TTask& initial_task, IHandler<TTask>& handler) override {
-        std::queue<TTask> queue;
-        std::mutex mutex;
-        std::condition_variable condition_variable;
+        moodycamel::ConcurrentQueue<TTask> queue;
         std::atomic_int run_counter = 0;
-        Enqueuer enqueuer(queue, mutex, condition_variable);
+        Enqueuer enqueuer(queue);
         enqueuer.Enqueue(initial_task);
         std::unique_ptr<std::unique_ptr<std::thread>[]> thread_pool =
             std::make_unique<std::unique_ptr<std::thread>[]>(concurrency);
@@ -92,32 +85,25 @@ class HandleQueueSystemMultiThread : public IHandleQueueSystem<TTask> {
             thread_pool[i] = std::make_unique<std::thread>([&] {
                 while (true) {
                     TTask task;
-                    {
-                        std::unique_lock lock(mutex);
-                        bool request_quit = false;
-                        while (queue.empty()) {
-                            if (run_counter == 0) {
-                                request_quit = true;
-                                break;
-                            }
-                            condition_variable.wait_until(lock, std::chrono::system_clock::now() + std::chrono::milliseconds(100));
-                        }
-                        if (request_quit)
+                    bool request_quit = false;
+                    while (!queue.try_dequeue(task)) {
+                        if (run_counter == 0) {
+                            request_quit = true;
                             break;
-                        task = queue.front();
-                        // printf("%d\n", queue.size());
-                        queue.pop();
-                        run_counter++;
+                        }
+                        std::this_thread::yield();
                     }
+                    if (request_quit)
+                        break;
                     try {
+                        run_counter++;
                         handler.Handle(task, enqueuer);
+                        run_counter--;
                     } catch (...) {
                         printf(
                             "HandleQueueSystemMultiThread<CubeTask*>::Solve(CubeTask*&, IHandler<CubeTask*>&): "
                             "Exception caught\n");
                     }
-                    run_counter--;
-                    condition_variable.notify_all();
                 }
             });
         }
