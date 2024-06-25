@@ -4,8 +4,9 @@
 
 constexpr int test_count = 20;
 
-std::string run_and_get_result(std::string cube_description) {
-    IHandleQueueSystem<PCubeTask>* pSystem = new HandleQueueSystemSingleThread<PCubeTask>();
+std::string run_and_get_result(std::string cube_description, bool multi_thread) {
+    IHandleQueueSystem<PCubeTask>* pSystem =
+        multi_thread ? new HandleQueueSystemMultiThread<PCubeTask>() : new HandleQueueSystemMultiThread<PCubeTask>();
     CubeHandler* pHandler = new CubeHandler(5, false, false);
     PCubeTask pTask = new CubeTask(Cube(cube_description), std::vector<CubeAction>());
 
@@ -17,7 +18,7 @@ std::string run_and_get_result(std::string cube_description) {
     return result;
 }
 
-bool run_test_for(int test_index) {
+bool run_test_for(int test_index, bool multi_thread) {
     std::string test_input;
     std::string expected_output;
     std::string test_source_code_path = std::string(__FILE__).substr(0, std::string(__FILE__).find_last_of("/\\"));
@@ -40,7 +41,7 @@ bool run_test_for(int test_index) {
         expected_output += " ";
     }
     expected_output.pop_back();
-    std::string result = run_and_get_result(test_input);
+    std::string result = run_and_get_result(test_input, multi_thread);
     std::stringstream ss(result);
     while (!ss.eof()) {
         std::string line;
@@ -56,8 +57,18 @@ bool run_test_for(int test_index) {
 
 int main() {
     bool has_failed = false;
+    printf("Running tests for single thread...\n");
     for (int i = 1; i <= test_count; i++) {
-        if (run_test_for(i)) {
+        if (run_test_for(i, false)) {
+            printf("Test %d passed\n", i);
+        } else {
+            has_failed = true;
+            printf("Test %d failed\n", i);
+        }
+    }
+    printf("Running tests for multi thread...\n");
+    for (int i = 1; i <= test_count; i++) {
+        if (run_test_for(i, true)) {
             printf("Test %d passed\n", i);
         } else {
             has_failed = true;
