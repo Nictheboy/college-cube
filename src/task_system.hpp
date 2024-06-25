@@ -100,7 +100,7 @@ class HandleQueueSystemMultiThread : public IHandleQueueSystem<TTask> {
                                 request_quit = true;
                                 break;
                             }
-                            condition_variable.wait(lock);
+                            condition_variable.wait_until(lock, std::chrono::system_clock::now() + std::chrono::milliseconds(100));
                         }
                         if (request_quit)
                             break;
